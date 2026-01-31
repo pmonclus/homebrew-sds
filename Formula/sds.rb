@@ -31,16 +31,18 @@ class Sds < Formula
       system python3, "sds/_build_ffi.py"
     end
 
-    # Install Python SDS bindings (source files only - pip can't build CFFI here)
-    # Use --no-deps to skip cffi_modules build attempt
-    system python3, "-m", "pip", "install", "--prefix=#{prefix}",
-           "--no-deps", "--no-build-isolation", "#{buildpath}/python"
-
-    # Manually copy the pre-built CFFI extension to the installed location
-    site_packages = lib/"python3.12/site-packages/sds"
+    # Manually install Python SDS bindings (pip rebuilds wheel and loses the .so)
+    site_packages = lib/"python3.12/site-packages"
+    (site_packages/"sds").mkpath
+    
+    # Copy all Python source files
+    Dir["python/sds/*.py"].each { |f| cp f, site_packages/"sds" }
+    cp "python/sds/_cdefs.h", site_packages/"sds"
+    
+    # Copy the pre-built CFFI extension
     cffi_so = Dir[buildpath/"python/sds/_sds_cffi*.so"].first
-    ohai "Copying CFFI extension: #{cffi_so} -> #{site_packages}"
-    cp cffi_so, site_packages
+    ohai "Copying CFFI extension: #{cffi_so}"
+    cp cffi_so, site_packages/"sds"
 
     # Install codegen package (pure Python, no CFFI)
     system python3, "-m", "pip", "install", "--prefix=#{prefix}",
