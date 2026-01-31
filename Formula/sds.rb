@@ -26,17 +26,21 @@ class Sds < Formula
     # Set up environment for building with installed packages
     ENV.prepend_path "PYTHONPATH", lib/"python3.12/site-packages"
 
-    # Build CFFI extension in-place (before pip install copies files)
-    # This ensures the .so file is built while we're in the source tree
+    # Build CFFI extension in-place (while C sources are available)
     cd "python" do
       system python3, "sds/_build_ffi.py"
     end
 
-    # Install Python SDS bindings (now includes the built .so)
+    # Install Python SDS bindings (source files only - pip can't build CFFI here)
+    # Use --no-deps to skip cffi_modules build attempt
     system python3, "-m", "pip", "install", "--prefix=#{prefix}",
-           "--no-build-isolation", "#{buildpath}/python"
+           "--no-deps", "--no-build-isolation", "#{buildpath}/python"
 
-    # Install codegen package (provides sds-codegen command)
+    # Manually copy the pre-built CFFI extension to the installed location
+    site_packages = lib/"python3.12/site-packages/sds"
+    cp Dir["python/sds/_sds_cffi*.so"].first, site_packages/
+
+    # Install codegen package (pure Python, no CFFI)
     system python3, "-m", "pip", "install", "--prefix=#{prefix}",
            "--no-build-isolation", buildpath.to_s
 
