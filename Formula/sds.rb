@@ -2,7 +2,7 @@ class Sds < Formula
   desc "SDS - Synchronized Data Structures for IoT over MQTT"
   homepage "https://github.com/pmonclus/sds-library"
   url "https://github.com/pmonclus/sds-library/archive/refs/tags/v0.3.0.tar.gz"
-  sha256 "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
+  sha256 "835c73e0a717863444649d229d091877fddab2b77f4f9beac42d326d9f9e13ba"
   license "MIT"
 
   depends_on "cmake" => :build
