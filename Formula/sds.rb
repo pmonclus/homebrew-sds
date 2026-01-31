@@ -26,7 +26,13 @@ class Sds < Formula
     # Set up environment for building with installed packages
     ENV.prepend_path "PYTHONPATH", lib/"python3.12/site-packages"
 
-    # Install Python SDS bindings
+    # Build CFFI extension in-place (before pip install copies files)
+    # This ensures the .so file is built while we're in the source tree
+    cd "python" do
+      system python3, "sds/_build_ffi.py"
+    end
+
+    # Install Python SDS bindings (now includes the built .so)
     system python3, "-m", "pip", "install", "--prefix=#{prefix}",
            "--no-build-isolation", "#{buildpath}/python"
 
@@ -108,5 +114,11 @@ class Sds < Formula
 
     system "#{bin}/sds-codegen", "test.sds", "--c"
     assert_predicate testpath/"sds_types.h", :exist?
+
+    # Test Python CFFI extension is working
+    python3 = Formula["python@3.12"].opt_bin/"python3.12"
+    ENV.prepend_path "PYTHONPATH", lib/"python3.12/site-packages"
+    system python3, "-c", "from sds._sds_cffi import ffi, lib; print('CFFI OK')"
+    system python3, "-c", "from sds import SdsNode, Role; print('SDS import OK')"
   end
 end
