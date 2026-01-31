@@ -38,7 +38,7 @@ class Sds < Formula
 
     # Manually copy the pre-built CFFI extension to the installed location
     site_packages = lib/"python3.12/site-packages/sds"
-    cp Dir["python/sds/_sds_cffi*.so"].first, site_packages/
+    cp Dir["python/sds/_sds_cffi*.so"].first, site_packages
 
     # Install codegen package (pure Python, no CFFI)
     system python3, "-m", "pip", "install", "--prefix=#{prefix}",
