@@ -18,8 +18,15 @@ class Sds < Formula
     system "cmake", "--build", "build"
     system "cmake", "--install", "build"
 
-    # Install Python SDS bindings
+    # Install Python dependencies first
     python3 = Formula["python@3.12"].opt_bin/"python3.12"
+    system python3, "-m", "pip", "install", "--prefix=#{prefix}",
+           "setuptools", "cffi"
+
+    # Set up environment for building with installed packages
+    ENV.prepend_path "PYTHONPATH", lib/"python3.12/site-packages"
+
+    # Install Python SDS bindings
     system python3, "-m", "pip", "install", "--prefix=#{prefix}",
            "--no-build-isolation", "#{buildpath}/python"
 
